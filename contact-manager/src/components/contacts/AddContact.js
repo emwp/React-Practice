@@ -8,12 +8,29 @@ class AddContact extends Component {
     name: '',
     email: '',
     phone: '',
+    errors: {},
   };
 
   onChange = e => this.setState({ [e.target.name]: e.target.value });
 
   onSubmit = (dispatch, e) => {
     const { name, email, phone } = this.state;
+    e.preventDefault();
+
+    // Check for erros
+    if (name === '') {
+      this.setState({ errors: { name: 'Name is Required' } });
+      return;
+    }
+    if (email === '') {
+      this.setState({ errors: { email: 'Email is Required' } });
+      return;
+    }
+    if (phone === '') {
+      this.setState({ errors: { phone: 'Phone is Required' } });
+      return;
+    }
+
     const newContact = {
       id: uuid(),
       name,
@@ -23,17 +40,17 @@ class AddContact extends Component {
 
     dispatch({ type: 'ADD_CONTACT', payload: newContact });
 
+    // Clear state
     this.setState({
       name: '',
       email: '',
       phone: '',
+      errors: {},
     });
-
-    e.preventDefault();
   };
 
   render() {
-    const { name, email, phone } = this.state;
+    const { name, email, phone, errors } = this.state;
 
     return (
       <Consumer>
@@ -50,6 +67,7 @@ class AddContact extends Component {
                     placeholder="Enter Name..."
                     value={name}
                     onChange={this.onChange}
+                    error={errors.name}
                   />
                   <TextInputGroup
                     label="Email"
@@ -58,6 +76,7 @@ class AddContact extends Component {
                     placeholder="Enter Email..."
                     value={email}
                     onChange={this.onChange}
+                    error={errors.email}
                   />
                   <TextInputGroup
                     label="Phone"
@@ -65,6 +84,7 @@ class AddContact extends Component {
                     placeholder="Enter Phone Number..."
                     value={phone}
                     onChange={this.onChange}
+                    errors={errors.phone}
                   />
 
                   <input type="submit" value="Add Contact" className="btn btn-block btn-light" />
