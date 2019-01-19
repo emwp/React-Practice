@@ -1,15 +1,32 @@
 import React, { Component } from 'react';
 import TextInputGroup from '../layout/TextInputGroup';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
+import { getContact, updateContact } from '../../actions/contactActions';
 
 class EditContact extends Component {
   state = {
     name: '',
     email: '',
     phone: '',
-    errors: {}
+    errors: {},
   };
 
-  onSubmit = (e) => {
+  componentWillReceiveProps(nextProps, nextState) {
+    const { name, email, phone } = nextProps.contact;
+    this.setState({
+      name,
+      email,
+      phone,
+    });
+  }
+
+  componentDidMount() {
+    const { id } = this.props.match.params;
+    this.props.getContact(id);
+  }
+
+  onSubmit = e => {
     e.preventDefault();
 
     const { name, email, phone } = this.state;
@@ -30,22 +47,24 @@ class EditContact extends Component {
       return;
     }
 
-    const updContact = {
-      name,
-      email,
-      phone
-    };
-
     const { id } = this.props.match.params;
 
+    const updContact = {
+      id,
+      name,
+      email,
+      phone,
+    };
+
     //// UPDATE CONTACT ////
+    this.props.updateContact(updContact);
 
     // Clear State
     this.setState({
       name: '',
       email: '',
       phone: '',
-      errors: {}
+      errors: {},
     });
 
     this.props.history.push('/');
@@ -86,11 +105,7 @@ class EditContact extends Component {
               onChange={this.onChange}
               error={errors.phone}
             />
-            <input
-              type="submit"
-              value="Update Contact"
-              className="btn btn-light btn-block"
-            />
+            <input type="submit" value="Update Contact" className="btn btn-light btn-block" />
           </form>
         </div>
       </div>
@@ -98,4 +113,16 @@ class EditContact extends Component {
   }
 }
 
-export default EditContact;
+EditContact.propTypes = {
+  contact: PropTypes.object.isRequired,
+  getContact: PropTypes.func.isRequired,
+};
+
+const mapStateToProps = state => ({
+  contact: state.contact.contact,
+});
+
+export default connect(
+  mapStateToProps,
+  { getContact, updateContact },
+)(EditContact);
